@@ -42,7 +42,7 @@ public class Queens
         return genotype;
     }
 
-    public static Integer[] binaryArrayFiller (int probability)
+    private static Integer[] binaryArrayFiller (int probability)
     {
         Integer [] randomBinaryInts = new Integer[] {0,0,0,0,0,0,0,0,0,0};
         // Fill randomBinaryInts with as many ones as the probablility. 
@@ -69,15 +69,13 @@ public class Queens
             return genotype;
         }
 
-        System.out.println("mutation is happening");
-
         // Pick two random indecies from 0 to length of genotype to be used as indecies for the allels. 
         // RandAllel2 will always be less than randAllel1 so it will be the first index. 
         int secondRandAllelIndex = r.nextInt(genotype.length);
+
         if (secondRandAllelIndex == 0) secondRandAllelIndex+=1; // Make sure that the first rand number is never zero.
+
         int initialRandAllelIndex = r.nextInt(secondRandAllelIndex);
-        System.out.println(initialRandAllelIndex);
-        System.out.println(secondRandAllelIndex);
 
         Integer[] mutatedArr  = new Integer[genotype.length];
 
@@ -104,21 +102,70 @@ public class Queens
 
         return mutatedArr;
     }
+
+    // Checks if an element from first array is present in the first second array by looping through entire array (including wraparound)
+    // Returns all the numbers that need to be added to crossover after the cutoff point
+    private static ArrayList<Integer> getNumsForCrossover (Integer[] arr0, Integer[] arr1, Integer cutOffPoint) 
+    {
+        ArrayList<Integer> temp = new ArrayList<Integer>(cutOffPoint);
+
+        // Loops that checks if an element from second parent is present in the first parent by looping through entire array (including wraparound)
+        for (int i = cutOffPoint; i<arr1.length + cutOffPoint ; i++)
+        {
+            boolean numExists = false;
+            for (int j = 0; j<cutOffPoint ; j++)
+            {
+                if (arr1[i%arr1.length] == arr0[j%arr0.length]) 
+                {
+                    numExists = true;
+                };
+            } 
+
+            if (!numExists)
+            {
+                temp.add(arr1[i%arr0.length]);
+            }
+        }
+
+        return temp;
+    }
     
     // creates 2 child genotypes using the 'cut-and-crossfill' method
     public static Integer[][] crossover(Integer[] parent0, Integer[] parent1)
     {
         Integer [][] children = new Integer [2][boardSize];
-        
-        // YOUR CODE GOES HERE
-        // DUMMY CODE TO REMOVE:
-        children[0] = new Integer[]{ 5, 4, 2, 11, 6, 8, 9, 1, 10, 12, 7, 3 };
-        children[1] = new Integer[]{ 6, 12, 2, 5, 7, 3, 9, 1, 10, 4, 11, 8 };
-        // END OF YOUR CODE
+
+        int cutOffPoint = parent0.length / 2;
+
+        // Copy over all the elements until cutoff point
+        System.arraycopy(parent0, 0, children[0], 0, cutOffPoint);
+        System.arraycopy(parent1, 0, children[1], 0, cutOffPoint);
+
+        ArrayList<Integer> temp = getNumsForCrossover(parent0, parent1, cutOffPoint);
+        ArrayList<Integer> temp1 = getNumsForCrossover(parent1, parent0, cutOffPoint);
+
+        // Copy over all the elements from cutoff point until the end
+        System.arraycopy(temp.toArray(), 0, children[0], cutOffPoint, cutOffPoint);
+        System.arraycopy(temp1.toArray(), 0, children[1], cutOffPoint, cutOffPoint);
         
         return children;
     }
     
+    private static int getUniqueNums(Integer[] arr)
+    {
+        Arrays.sort(arr);
+        int uniqueCounter = 1;
+ 
+        for (int i = 1; i < arr.length; i++) 
+        {
+            if (arr[i-1] != arr[i])
+            {
+                uniqueCounter++;
+            }
+        }
+        return uniqueCounter;
+    }
+
     // calculates the fitness of an individual
     public static int fitness(Integer [] genotype)
     {
@@ -131,10 +178,26 @@ public class Queens
          * For a 12x12 board the maximum fitness is 66 (no checks),
          * and the minimum fitness is 0 (all queens in a line).
          */
-        int fitness = (int) (0.5 * boardSize * (boardSize - 1));
         
-        // YOUR CODE GOES HERE
-        
+        int diagonalCheck = 0;
+
+        for (int i=0; i < genotype.length;  i++) {
+            for (int j=0; j < genotype.length ;  j++) {
+                if ( i != j) 
+                {
+                    int n = Math.abs(i-j);
+                    int m = Math.abs(genotype[i] - genotype[j]);
+                    if(n == m) {diagonalCheck += 1;}
+                }
+            } 
+        }
+
+        int uniqueNums = getUniqueNums (genotype);
+        int rowOrColumnCheck = genotype.length - uniqueNums;
+        int totalChecks = rowOrColumnCheck/2 + diagonalCheck/2;
+
+        int fitness = 66 - (totalChecks);
+ 
         return fitness;
     }
 }
