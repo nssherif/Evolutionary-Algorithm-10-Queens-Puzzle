@@ -63,14 +63,14 @@ public class Queens
         Random r = new Random();
         int randomNum = r.nextInt(randomBinaryInts.length);
 
-        // Dont mutate if selected random nubmer is 0;
+        // Select a random number from the binary ints array and dont mutate if selected nubmer is 0
         if (randomBinaryInts[randomNum] == 0) 
         {
             return genotype;
         }
 
         // Pick two random indecies from 0 to length of genotype to be used as indecies for the allels. 
-        // RandAllel2 will always be less than randAllel1 so it will be the first index. 
+        // secondRandAllelIndex will always be less than randAllel1 so it will be the first index. 
         int secondRandAllelIndex = r.nextInt(genotype.length);
 
         if (secondRandAllelIndex == 0) secondRandAllelIndex+=1; // Make sure that the first rand number is never zero.
