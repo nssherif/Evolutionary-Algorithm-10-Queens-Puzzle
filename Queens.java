@@ -1,18 +1,15 @@
 import java.lang.Math;
 import java.util.*;
 
-/* YOU NEED TO ADD YOUR CODE TO THIS CLASS, REMOVING ALL DUMMY CODE
- *
- * DO NOT CHANGE THE NAME OR SIGNATURE OF ANY OF THE EXISTING METHODS
- * (Signature includes parameter types, return types and being static)
- *
- * You can add private methods to this class if it makes your code cleaner,
- * but this class MUST work with the UNMODIFIED Tester.java class.
- *
- * This is the ONLY class that you can submit for your assignment.
- *
- * MH September 2022
- */
+/************ 
+
+Date: Oct 10
+Written by Negib Sherif
+Assignment 2
+
+To compile run: javac Queens.java
+************/
+
 public class Queens
 {
     private static int boardSize = 12;
@@ -52,6 +49,28 @@ public class Queens
         }
         return randomBinaryInts;
     }
+
+    // Generate two random numbers
+    private static Integer[] twoRandNumsGenerator ()
+    {
+        Integer [] randIndeces = new Integer[2];
+        // Placeholder arraylist with all possible index values in genotype
+        ArrayList<Integer> genome = new ArrayList<Integer>(
+                Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11));
+
+        Random r = new Random();
+        int index1 = r.nextInt(genome.size());
+        int randNum1 = genome.get(index1); // Get first random index value
+
+        genome.remove(index1); // Remove first index value so that the second index value is never the same
+
+        int index2 = r.nextInt(genome.size());
+        int randNum2 = genome.get(index2);
+
+        randIndeces = new Integer[]{randNum1, randNum2};
+        
+        return randIndeces;
+    }
     
     // move a gene in the genotype
     // the move happens with probability p, so if p = 0.8
@@ -69,37 +88,56 @@ public class Queens
             return genotype;
         }
 
-        // Pick two random indecies from 0 to length of genotype to be used as indecies for the allels. 
-        // secondRandAllelIndex will always be less than randAllel1 so it will be the first index. 
-        int secondRandAllelIndex = r.nextInt(genotype.length);
-
-        if (secondRandAllelIndex == 0) secondRandAllelIndex+=1; // Make sure that the first rand number is never zero.
-
-        int initialRandAllelIndex = r.nextInt(secondRandAllelIndex);
-
         Integer[] mutatedArr  = new Integer[genotype.length];
 
         Integer[] tempArr  = new Integer[genotype.length-1];
 
-        // Copy over all the elements (until initial random allel index) from original array into mutated array
-        System.arraycopy(genotype, 0, mutatedArr, 0, initialRandAllelIndex+1);
-        
-        // Copy the value of the second alle after the first alle
-        mutatedArr[initialRandAllelIndex+1] = genotype[secondRandAllelIndex];
+        Integer[] randIndexes = twoRandNumsGenerator();
 
-        // Remove the value of the second alle index from the genotype
-        for (int i = 0, j = 0; i < genotype.length; i++) {
-            if (i != secondRandAllelIndex) {
-                tempArr[j++] = genotype[i];
+        System.out.println(Arrays.toString(randIndexes));
+
+        if (randIndexes[0] < randIndexes[1]) {
+            // Copy over all the elements (until initial random allel index) from original array into mutated array
+            System.arraycopy(genotype, 0, mutatedArr, 0, randIndexes[0]+1);
+            
+            // Copy the value of the second alle after the first alle
+            mutatedArr[randIndexes[0]+1] = genotype[randIndexes[1]];
+
+            // Remove the value of the second alle index from the genotype
+            for (int i = 0, j = 0; i < genotype.length; i++) {
+                if (i != randIndexes[1]) {
+                    tempArr[j++] = genotype[i];
+                }
+            }
+
+            // Copy over all the elements from genotype from intial alle index until the end
+            for (int i = randIndexes[0]+1; i<tempArr.length; i++) 
+            {
+                mutatedArr[i+1] = tempArr[i];
+            }
+
+        }
+
+        else if (randIndexes[0] > randIndexes[1]) {
+            // Copy over all elements until the greater index while skipping the value in the first index
+            for (int i = 0, j = 0; i <= randIndexes[0]; i++) {
+                if (i != randIndexes[1]) {
+                    mutatedArr[j++] = genotype[i];
+                }
+            }
+
+            // Copy the value of the second alle after the first alle
+            mutatedArr[randIndexes[0]] = genotype[randIndexes[1]];
+
+            // Copy over all the elements from genotype from first alle index until the end
+            for (int i = 0; i<genotype.length; i++) 
+            {
+                if (mutatedArr[i] == null) {
+                    mutatedArr[i] = genotype[i];
+                }
             }
         }
-
-        // Copy over all the elements from genotype from intial alle index until the end
-        for (int i = initialRandAllelIndex+1; i<tempArr.length; i++) 
-        {
-            mutatedArr[i+1] = tempArr[i];
-        }
-
+        
         return mutatedArr;
     }
 
